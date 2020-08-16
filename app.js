@@ -1,14 +1,29 @@
+const first = document.querySelector('.first');
+const previous = document.querySelector('.previous');
+const next = document.querySelector('.next');
+const last = document.querySelector('.last');
+let page = 0;
+let arrayList = [];
+
+let dropdownBtn = `
+     <div class="dropdown">
+       <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select background</button>
+       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item" href="#">Black</a>
+    <a class="dropdown-item" href="#">Red</a>
+    </div>
+   </div>
+   `;
+
 async function showEmployees() {
 
-    const container = document.getElementById('commits');
+    const container = document.querySelector('.list-group');
     const baseUrl = 'https://hiring.rewardgateway.net/list';
-
 
     fetch(baseUrl, {
         method: 'GET',
-        headers: {'Authorization': 'Basic ' + btoa('hard:hard')}
+        headers: { 'Authorization': 'Basic ' + btoa('hard:hard') }
     })
-
         .then(res => {
 
             if (res.status < 400) {
@@ -22,22 +37,72 @@ async function showEmployees() {
             }
         })
 
+
         .then(data => {
-            console.log(data)
-            data.forEach(element => {
+
+            data.map(element => {
 
                 let li = document.createElement('li');
+                li.className = 'list-group-item';
 
-                li.innerText = `uuid: ${element.uuid}
-                  company: ${element.company} 
-                  bio: ${element.bio}
-                  name: ${element.name}
-                  title: ${element.title}
-                  avatar: ${element.avatar}
-                  \n`;
+                li.innerHTML = `
+                    <div>
+                    ${dropdownBtn}
+                    <p><b>uuid</b>: ${element.uuid}</p>
+                    <p><b>company</b>: ${element.company}</p>
+                    <p><b>bio</b>: ${element.bio}</p>
+                    <p><b>name</b>: ${element.name}</p>
+                    <p><b>title</b>: ${element.title}</p>
+                    <p><b>avatar</b><br/><a href="${element.avatar}" target="_blank"><img src="${element.avatar}" alt=""></a></p>
+                    </div>
+                    `;
+                arrayList.push(li);
+            })
 
-                container.appendChild(li);
+            for (let i = 1; i < page + 21; i++) {
+                container.appendChild(arrayList[i])
+            }
+
+            next.addEventListener('click', () => {
+
+                page == arrayList.length - 21 ? (page = 0) : (page += 21);
+                container.innerHTML = "";
+
+                for (let i = page; i < page + 21; i++) {
+
+                    container.appendChild(arrayList[i])
+                }
             });
+
+            previous.addEventListener('click', () => {
+
+                page == 0 ? (page = arrayList.length - 21) : (page -= 21);
+                container.innerHTML = "";
+
+                for (let i = page; i < page + 21; i++) {
+
+                    container.appendChild(arrayList[i])
+                }
+            });
+
+
+            first.addEventListener('click', () => {
+                page = 0;
+                container.innerHTML = "";
+                for (let i = page; i < page + 21; i++) {
+                    container.appendChild(arrayList[i])
+                }
+            });
+
+            last.addEventListener('click', () => {
+
+                page = arrayList.length - 21;
+                container.innerHTML = "";
+                for (let i = page; i < page + 21; i++) {
+                    container.appendChild(arrayList[i])
+                }
+            });
+
         })
 
         .catch(err => {                                      // If return an error -  resolve a new promise here (catch)
@@ -47,54 +112,13 @@ async function showEmployees() {
             container.appendChild(errorLi)
             console.log(err)
         })
-
 }
 
-/*  async function showEmployees() {
+setTimeout( () => {
+    let drpBtn = document.querySelector('.dropdown-item:first-child');
+    drpBtn.style.color = 'tomato'
+    console.log(drpBtn);
+}, 3500)
 
-    const username = 'hard';
-    const password = username;
 
-    const baseUrl = 'https://hiring.rewardgateway.net/list';
-
-    fetch(baseUrl, {
-        headers: {
-
-            "Authorization": "Basic" + username + password,
-
-        }
-
-    })
-
-    .then(res => {
-        return res.json();
-    })
-    .then(data => {
-        console.log(data)
-    })
-    .catch(err => {
-        console.log(err)
-    })
-} */
-
-/*  async function showEmployees() {
-
-    const baseUrl = 'https://hiring.rewardgateway.net/list';
-
-    try {
-        const res = await axios.get(baseUrl, {
-            // Axios looks for the `auth` option, and, if it is set, formats a
-            // basic auth header for you automatically.
-            auth: {
-                username: 'hard',
-                password: 'hard'
-            }
-        });
-
-        console.log(res)
-    } catch (error) {
-        throw new Error(error.message)
-    }
-
-}*/
 
