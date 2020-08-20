@@ -1,3 +1,7 @@
+let container = document.getElementById('commits');
+let hpCharacters = [];
+
+// Pagination DOM elements
 const first = document.querySelector('.first');
 const previous = document.querySelector('.previous');
 const next = document.querySelector('.next');
@@ -5,120 +9,185 @@ const last = document.querySelector('.last');
 let page = 0;
 let arrayList = [];
 
-let dropdownBtn = `
-     <div class="dropdown">
-       <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select background</button>
-       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-    <a class="dropdown-item" href="#">Black</a>
-    <a class="dropdown-item" href="#">Red</a>
-    </div>
-   </div>
-   `;
-
-async function showEmployees() {
-
-    const container = document.querySelector('.list-group');
-    const baseUrl = 'https://hiring.rewardgateway.net/list';
-
-    fetch(baseUrl, {
-        method: 'GET',
-        headers: { 'Authorization': 'Basic ' + btoa('hard:hard') }
-    })
-        .then(res => {
-
-            if (res.status < 400) {
-                return res.json();
-
-            } else {
-                throw ({
-                    status: res.status,
-                    statusText: res.statusText
-                })
-            }
-        })
+// adding dropdown 
+let dropdown = `
+   <select class="changeBackgroundColor">
+    <option value="">Choose a color</option>
+    <option value="red">Red</option>
+    <option value="green">Green</option>
+</select>`;
 
 
-        .then(data => {
+// adding input text
+let inputText = `
+ <div>
+  <input type="text" name="fname" required>
+  <button class="button" type="button">Click</button>
+  </div>`;
 
-            data.map(element => {
+const showError = (err) => {
 
-                let li = document.createElement('li');
-                li.className = 'list-group-item';
-
-                li.innerHTML = `
-                    <div>
-                    ${dropdownBtn}
-                    <p><b>uuid</b>: ${element.uuid}</p>
-                    <p><b>company</b>: ${element.company}</p>
-                    <p><b>bio</b>: ${element.bio}</p>
-                    <p><b>name</b>: ${element.name}</p>
-                    <p><b>title</b>: ${element.title}</p>
-                    <p><b>avatar</b><br/><a href="${element.avatar}" target="_blank"><img src="${element.avatar}" alt=""></a></p>
-                    </div>
-                    `;
-                arrayList.push(li);
-            })
-
-            for (let i = 1; i < page + 21; i++) {
-                container.appendChild(arrayList[i])
-            }
-
-            next.addEventListener('click', () => {
-
-                page == arrayList.length - 21 ? (page = 0) : (page += 21);
-                container.innerHTML = "";
-
-                for (let i = page; i < page + 21; i++) {
-
-                    container.appendChild(arrayList[i])
-                }
-            });
-
-            previous.addEventListener('click', () => {
-
-                page == 0 ? (page = arrayList.length - 21) : (page -= 21);
-                container.innerHTML = "";
-
-                for (let i = page; i < page + 21; i++) {
-
-                    container.appendChild(arrayList[i])
-                }
-            });
-
-
-            first.addEventListener('click', () => {
-                page = 0;
-                container.innerHTML = "";
-                for (let i = page; i < page + 21; i++) {
-                    container.appendChild(arrayList[i])
-                }
-            });
-
-            last.addEventListener('click', () => {
-
-                page = arrayList.length - 21;
-                container.innerHTML = "";
-                for (let i = page; i < page + 21; i++) {
-                    container.appendChild(arrayList[i])
-                }
-            });
-
-        })
-
-        .catch(err => {                                      // If return an error -  resolve a new promise here (catch)
-            let errorLi = document.createElement('li');
-            errorLi.style.cssText = 'color: red'
-            errorLi.innerText = `Error ${err.status} (${err.statusText})`
-            container.appendChild(errorLi)
-            console.log(err)
-        })
+    let errorLi = document.createElement('li');
+    errorLi.style.cssText = 'color: red'
+    errorLi.innerText = `Error ${err.status} (${err.statusText})`
+    container.appendChild(errorLi);
+    console.log(err);
 }
 
-setTimeout( () => {
-    let drpBtn = document.querySelector('.dropdown-item:first-child');
-    drpBtn.style.color = 'tomato'
-    console.log(drpBtn);
-}, 3500)
+const showEmployees = async () => {
+    try {
+        const res = await fetch('https://hiring.rewardgateway.net/list', {
+            method: 'GET',
+            headers: { 'Authorization': 'Basic ' + btoa('hard:hard') }
+        }
+        );
+        hpCharacters = await res.json();
+        displayEmployees(hpCharacters);
+    } catch {
+        showError('Error');
+    }
+};
+
+const displayEmployees = async (characters) => {
+
+    try {
+        await characters.map(element => {
+
+            let li = document.createElement('li');
+            li.className = 'list-group-item';
+
+            li.innerHTML = `
+              <li>${dropdown}</li>
+              <li>${inputText}</li>
+              <li><a href="#"><b>uuid:</b> ${element.uuid}</a></li>
+              <li><a href="#"><b>company:</b>  ${element.company}</a></li>
+              <li><a href="#"><b>bio:</b> ${element.bio}</a></li>
+              <li><a href="#"><b>title:</b> ${element.title}</a></li>
+              <li class="addedInputText"><a href="#"><b>Inputed Text:</b> </a></li>
+              <li><b>avatar</b><br/><a href="${element.avatar}" target="_blank"><img src="${element.avatar}" alt=""></a></li>
+              `;
+            arrayList.push(li);
+
+        });
+
+    } catch {
+        showError('Error')
+    }
+
+    // Pagination for list items - 20 items per page
+    for (let i = 1; i < page + 21; i++) {
+        container.append(arrayList[i])
+    }
+
+    next.addEventListener('click', () => {
+
+        page == arrayList.length - 21 ? (page = 0) : (page += 21);
+        container.innerHTML = "";
+
+        for (let i = page; i < page + 21; i++) {
+
+            container.append(arrayList[i])
+        }
+    });
+
+    previous.addEventListener('click', () => {
+
+        page == 0 ? (page = arrayList.length - 21) : (page -= 21);
+        container.innerHTML = "";
+
+        for (let i = page; i < page + 21; i++) {
+
+            container.append(arrayList[i])
+        }
+    });
 
 
+    first.addEventListener('click', () => {
+        page = 0;
+        container.innerHTML = "";
+        for (let i = page; i < page + 21; i++) {
+            container.append(arrayList[i])
+
+        }
+    });
+
+    last.addEventListener('click', () => {
+
+        page = arrayList.length - 21;
+        container.innerHTML = "";
+        for (let i = page; i < page + 21; i++) {
+            container.append(arrayList[i])
+
+        }
+    });
+
+};
+
+
+// Adding dropdown and change backgroud color for lists
+const dropdownFunc = () => {
+    let dropdownBtn = document.querySelector('.changeBackgroundColor');
+    dropdownBtn.addEventListener('change', async () => {
+
+        let backgroundColorValue = document.querySelector('.changeBackgroundColor').value;
+
+        let listItem = document.querySelectorAll('#commits li');
+
+        listItem.forEach(element => {
+            element.style.backgroundColor = backgroundColorValue;
+        });
+
+        let listItemAnchorTag = document.querySelectorAll('#commits li li a');
+
+        listItemAnchorTag.forEach(el => {
+            el.style.color = 'white';
+        })
+    })
+}
+
+const appendInputText = () => {
+
+    // Add input text input for each list item
+    let addBtn = document.querySelector('.list-group-item button');
+
+    addBtn.addEventListener('click', () => {
+
+        let addInputTxt = document.querySelector('.list-group-item input').value;
+        let addedTxtInput = document.querySelector('.addedInputText');
+
+        addedTxtInput.append(addInputTxt)
+
+    })
+}
+
+// Search appened text - jQuery helps
+$('#search-input').on('keyup', function () {
+
+    let value = $(this).val().toLowerCase();
+    $('#commits > li li').filter(function () {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    })
+})
+
+// just trial - Persist the added background color and label data after page refresh
+function persistRefreshing() {
+    if (sessionStorage.getItem('colour')) {
+
+        let listItem = document.querySelectorAll('#commits li');
+        document.body.style.backgroundColor = sessionStorage.getItem('colour');
+    }else{
+        document.body.style.backgroundColor =  "#ff0000";
+        sessionStorage.setItem('colour', "#ff0000");
+    }
+}
+
+
+persistRefreshing();
+
+
+setTimeout(() => {
+    dropdownFunc();
+    appendInputText();
+    changeBackground();
+}, 1500)
 
